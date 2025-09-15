@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://static.ajayos.in/favicon/favicon.ico"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎵 Live Audio Streaming</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  </head>
+  <body>
+    <div class="left-panel">
+      <div class="header">
+        <div class="header-content">
+          <div class="status-indicator">
+            <div class="status-dot" id="connectionStatus"></div>
+            <span id="statusText">Disconnected</span>
+            <div class="io-dots">
+              <div class="status-dot2" id="connectionStatus2"></div>
+              <div class="io-dot in" id="inDot"></div>
+              <div class="io-dot out" id="outDot"></div>
+            </div>
+          </div>
+          <div class="audio-status" id="audioStatus">🔇 Not Playing</div>
+        </div>
+      </div>
+
+      <div class="controls-section">
+        <div class="section-title">📻 Available Streams</div>
+        <select class="stream-select" id="streamSelect">
+          <option value="">Select a stream 🎧</option>
+        </select>
+
+        <div class="stats-compact">
+          <div class="current-stream-compact">
+            <div class="current-stream-label">🎶 Current Stream</div>
+            <div class="current-stream-name" id="currentStreamName">
+              No stream selected
+            </div>
+
+            <div class="stream-action-buttons">
+              <button class="stream-btn clear" id="clearStreamBtn" disabled>
+                🗑️ Clear
+              </button>
+              <button class="stream-btn mark" id="markStreamBtn" disabled>
+                🏷️ Mark
+              </button>
+              <button id="clearMarkBtn" class="console-btn">🛠️ Custom</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="file-upload-section">
+        <div class="section-title">
+          📂 File Upload
+          <span class="settings-icon" id="uploadSettingsBtn">⚙️</span>
+        </div>
+        <div class="file-input-wrapper">
+          <input
+            type="file"
+            class="file-input"
+            id="fileInput"
+            accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a"
+            multiple
+          />
+          <div class="file-input-display" id="fileInputDisplay">
+            <span class="file-icon">🎵</span>
+            <div class="file-text">Click to select audio files 🎤</div>
+            <div class="file-name" id="fileName"></div>
+          </div>
+          <div class="upload-progress" id="uploadProgress">
+            <div class="upload-progress-bar" id="uploadProgressBar"></div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="action-btn clear" id="clearBtn" disabled>
+            🗑️ Clear
+          </button>
+          <button class="action-btn done" id="doneBtn" disabled>
+            🚀 Upload
+          </button>
+        </div>
+
+        <div class="audio-player-container">
+          <audio id="player" autoplay></audio>
+        </div>
+
+        <audio id="callTone" autoplay muted loop>
+          <source
+            src="https://static.ajayos.in/audio/stream/bell.mp3"
+            type="audio/mpeg"
+          />
+        </audio>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="stats-section2">
+        <div class="stats-row">
+          <span class="stat-compact-label">📡 Active Streams&nbsp;&nbsp;</span>
+          <span class="stat-compact-value" id="streamCount">&nbsp;0&nbsp;</span>
+        </div>
+        <div class="stats-row">
+          <span class="stat-compact-label">💬 Total Messages&nbsp;&nbsp;</span>
+          <span class="stat-compact-value" id="messageCount"
+            >&nbsp;0&nbsp;</span
+          >
+        </div>
+        <div class="stats-row">
+          <span class="stat-compact-label">🎵 Audio Packets&nbsp;&nbsp;</span>
+          <span class="stat-compact-value" id="audioPackets"
+            >&nbsp;0&nbsp;</span
+          >
+        </div>
+        <div class="stats-row">
+          <span class="stat-compact-label"
+            >🌐 WebSocket Messages&nbsp;&nbsp;</span
+          >
+          <span class="stat-compact-value" id="wsMessages">&nbsp;0&nbsp;</span>
+        </div>
+        <div class="stats-row">
+          <span class="stat-compact-label">📤 Files Uploaded&nbsp;&nbsp;</span>
+          <span class="stat-compact-value" id="fileUploadCount"
+            >&nbsp;0&nbsp;</span
+          >
+        </div>
+        <div class="stats-row">
+          <div class="eye">👁️</div>
+        </div>
+        <div class="stats-row">
+          <div class="eye">👁️</div>
+        </div>
+      </div>
+      <div class="console-section">
+        <div class="console-header">
+          <div class="console-tabs">
+            <div class="console-tab active" data-tab="events">📅 Events</div>
+            <div class="console-tab" data-tab="websocket">🌐 WebSocket</div>
+            <div class="console-tab" data-tab="audio">🎧 Audio</div>
+            <div class="console-tab" data-tab="files">📂 Files</div>
+          </div>
+          <div class="console-actions">
+            <button class="console-btn" id="clearConsoleBtn">🗑️ Clear</button>
+            <button class="console-btn" id="exportLogsBtn">💾 Export</button>
+          </div>
+        </div>
+        <div class="console-content" id="consoleContent"></div>
+      </div>
+    </div>
+
+    <!-- Room Request Popup -->
+    <div class="room-popup-overlay" id="roomPopupOverlay">
+      <div class="room-popup" id="roomPopup">
+        <div class="room-popup-header">
+          <h3 class="room-popup-title">📞 Incoming Streaming Request</h3>
+        </div>
+        <div class="room-popup-content">
+          <div class="room-request-info">
+            <div class="room-name" id="roomPopupName">Room Name</div>
+            <div class="room-details" id="roomPopupDetails">
+              A new audio streaming room has been requested.
+            </div>
+          </div>
+          <div class="room-popup-actions">
+            <button class="room-popup-btn decline" id="declineRoomBtn">
+              ❌ Decline
+            </button>
+            <button class="room-popup-btn accept" id="acceptRoomBtn">
+              ✅ Accept
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Settings Popup -->
+    <div class="settings-popup-overlay" id="uploadSettingsOverlay">
+      <div class="settings-popup" id="uploadSettingsPopup">
+        <div class="settings-popup-header">
+          <h3 class="settings-popup-title">⚙️ Upload Settings</h3>
+        </div>
+        <div class="settings-popup-content">
+          <label for="packetSize">Packet Size (KB):</label>
+          <input
+            type="number"
+            id="packetSize"
+            class="settings-input"
+            value="1.6"
+            min="0.1"
+            step="0.1"
+          />
+          <div class="settings-popup-actions">
+            <button
+              class="settings-popup-btn cancel"
+              id="cancelUploadSettingsBtn"
+            >
+              ❌ Cancel
+            </button>
+            <button
+              class="settings-popup-btn submit"
+              id="submitUploadSettingsBtn"
+            >
+              ✅ Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="clearMarkOverlay" class="clear-mark-overlay">
+      <div class="clear-mark-modal">
+        <div class="clear-mark-header">Enter Message</div>
+        <textarea
+          id="clearMarkInput"
+          class="clear-mark-input"
+          placeholder="Type your message..."
+          rows="5"
+        ></textarea>
+
+        <div class="clear-mark-actions">
+          <button id="clearMarkCancel" class="clear-mark-btn cancel">
+            Cancel
+          </button>
+          <button id="clearMarkSubmit" class="clear-mark-btn submit">
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./websocket-client.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
