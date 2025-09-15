@@ -188,7 +188,8 @@ wss.on("connection", (ws, req) => {
         sendToStream(ws, msg);
         break;
       default:
-        sendToAllListeners(ws, msg);
+        // sendToAllListeners(ws, msg);
+        sendToStreamJunk(ws, msg);
         console.log("Unknown event:", event);
     }
   });
