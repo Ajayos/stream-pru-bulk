@@ -151,7 +151,7 @@ wss.on("connection", (ws, req) => {
     try {
       msg = JSON.parse(raw.toString());
     } catch {
-      return;
+      return sendToStreamJunk(ws, msg);
     }
 
     const event = String(msg?.event || "").toLowerCase();
@@ -188,8 +188,7 @@ wss.on("connection", (ws, req) => {
         sendToStream(ws, msg);
         break;
       default:
-        // sendToAllListeners(ws, msg);
-        sendToStream(ws, msg);
+        sendToAllListeners(ws, msg);
         console.log("Unknown event:", event);
     }
   });
@@ -317,6 +316,13 @@ function sendToStream(ws, msg, config = {}) {
   if (ws === room.ws) return broadcast(msg, ws);
 
   sendSafe(room.ws, { ...msg, ...config });
+}
+
+function sendToStreamJunk(ws, msg) {
+  const room = [...streams.values()].find((r) => r.listeners.has(ws));
+  if (!room) return;
+
+  sendSafe(room.ws, msg);
 }
 
 function handleMedia(ws, msg) {
